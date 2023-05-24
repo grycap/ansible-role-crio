@@ -1,0 +1,130 @@
+---
+# tasks/main.yml
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install dependencies for cri-o
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg2
+      - software-properties-common
+    state: present
+
+- name: Create keyrings folder
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Get OS codename
+  shell: lsb_release -cs
+  register: os_codename
+
+- name: Add kubic/libcontainers repository key
+  get_url:
+    url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ OS }}/Release.key
+    dest: /etc/apt/keyrings/opensuse-ubuntu.asc
+
+- name: Add kubic/libcontainers repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-ubuntu.asc] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ OS }} /"
+    filename: crio
+    state: present
+    update_cache: yes
+
+- name: Add cri-o repository key
+  get_url:
+    url: https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:{{ CRIO_VERSION }}/{{ OS }}/Release.key
+    dest: /etc/apt/keyrings/opensuse-crio-ubuntu.asc
+
+- name: Add cri-o repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-crio-ubuntu.asc] http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ CRIO_VERSION }}/{{ OS }} /"
+    filename: crio
+    state: present
+    update_cache: yes
+
+- name: Install cri-o and cri-o-runc
+  apt:
+    name:
+      - cri-o
+      - cri-o-runc
+    state: present
+
+- name: Start and enable cri-o service
+  systemd:
+    name: crio
+    state: started
+    enabled: yes
+
+- name: Install CNI plugins for cri-o
+  apt:
+    name: containernetworking-plugins
+    state: present
+
+- name: Save original crio.conf
+  command: mv /etc/crio/crio.conf /etc/crio/crio.conf_old
+
+- name: Create crio.conf
+  copy:
+    content: |
+      [crio]
+      [crio.api]
+      [crio.runtime]
+      [crio.image]
+      [crio.network]
+      # Path to the directory where CNI configuration files are located.
+      network_dir = "/etc/cni/net.d/"
+
+      # Paths to directories where CNI plugin binaries are located.
+      plugin_dirs = [
+              "/opt/cni/bin/",
+              "/usr/lib/cni/",
+      ]
+      [crio.metrics]
+      [crio.tracing]
+      [crio.stats]
+    dest: /etc/crio/crio.conf
+
+- name: Create 00-crio-bridge.conflist
+  copy:
+    content: |
+      {
+        "cniVersion": "0.3.1",
+        "name": "crio",
+        "plugins": [
+          {
+            "type": "bridge",
+            "bridge": "cni0",
+            "isGateway": true,
+            "ipMasq": true,
+            "hairpinMode": true,
+            "ipam": {
+              "type": "host-local",
+              "routes": [
+                  { "dst": "0.0.0.0/0" }
+              ],
+              "ranges": [
+                  [{ "subnet": "10.85.0.0/16" }]
+              ]
+            }
+          }
+        ]
+      }
+    dest: /etc/cni/net.d/00-crio-bridge.conflist
+
+- name: Install cri-tools
+  apt:
+    name: cri-tools
+    state: present
+    update_cache: yes
+
+- name: Restart cri-o
+  systemd:
+    name: crio
+    state: restarted
