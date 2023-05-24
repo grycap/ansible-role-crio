@@ -1,5 +1,5 @@
 galaxy_info:
-  role_name: cri-o
+  role_name: cri_o
   namespace: grycap
   author: esparig@i3m.upv.es
   description: Install cri-o
