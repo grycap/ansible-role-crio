@@ -4,6 +4,7 @@
 - name: Update apt cache
   apt:
     update_cache: yes
+    cache_valid_time: 900
 
 - name: Install dependencies for cri-o
   apt:
@@ -21,30 +22,26 @@
     state: directory
     mode: '0755'
 
-- name: Get OS codename
-  shell: lsb_release -cs
-  register: os_codename
-
 - name: Add kubic/libcontainers repository key
   get_url:
-    url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ OS }}/Release.key
+    url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ ansible_distribution_release }}/Release.key
     dest: /etc/apt/keyrings/opensuse-ubuntu.asc
 
 - name: Add kubic/libcontainers repository
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-ubuntu.asc] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ OS }} /"
+    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-ubuntu.asc] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ ansible_distribution_release }} /"
     filename: crio
     state: present
     update_cache: yes
 
 - name: Add cri-o repository key
   get_url:
-    url: https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:{{ CRIO_VERSION }}/{{ OS }}/Release.key
+    url: https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:{{ CRIO_VERSION }}/{{ ansible_distribution_release }}/Release.key
     dest: /etc/apt/keyrings/opensuse-crio-ubuntu.asc
 
 - name: Add cri-o repository
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-crio-ubuntu.asc] http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ CRIO_VERSION }}/{{ OS }} /"
+    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-crio-ubuntu.asc] http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ CRIO_VERSION }}/{{ ansible_distribution_release }} /"
     filename: crio
     state: present
     update_cache: yes
@@ -67,9 +64,6 @@
     name: containernetworking-plugins
     state: present
 
-- name: Save original crio.conf
-  command: mv /etc/crio/crio.conf /etc/crio/crio.conf_old
-
 - name: Create crio.conf
   copy:
     content: |
@@ -90,6 +84,7 @@
       [crio.tracing]
       [crio.stats]
     dest: /etc/crio/crio.conf
+    backup: true
 
 - name: Create 00-crio-bridge.conflist
   copy:
