@@ -24,24 +24,24 @@
 
 - name: Add kubic/libcontainers repository key
   get_url:
-    url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ ansible_distribution_release }}/Release.key
+    url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ OS }}/Release.key
     dest: /etc/apt/keyrings/opensuse-ubuntu.asc
 
 - name: Add kubic/libcontainers repository
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-ubuntu.asc] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ ansible_distribution_release }} /"
+    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-ubuntu.asc] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ OS }} /"
     filename: crio
     state: present
     update_cache: yes
 
 - name: Add cri-o repository key
   get_url:
-    url: https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:{{ CRIO_VERSION }}/{{ ansible_distribution_release }}/Release.key
+    url: https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:{{ CRIO_VERSION }}/{{ OS }}/Release.key
     dest: /etc/apt/keyrings/opensuse-crio-ubuntu.asc
 
 - name: Add cri-o repository
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-crio-ubuntu.asc] http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ CRIO_VERSION }}/{{ ansible_distribution_release }} /"
+    repo: "deb [signed-by=/etc/apt/keyrings/opensuse-crio-ubuntu.asc] http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ CRIO_VERSION }}/{{ OS }} /"
     filename: crio
     state: present
     update_cache: yes
