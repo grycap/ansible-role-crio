@@ -1,6 +1,10 @@
 ---
 # tasks/main.yml
 
+- name: Set OS var
+  set_fact:
+    OS: "x{{ansible_distribution }}_{{ ansible_distribution_version }}"
+
 - name: Update apt cache
   apt:
     update_cache: yes
