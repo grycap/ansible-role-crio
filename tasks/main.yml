@@ -126,3 +126,4 @@
     name: cri-tools
     state: present
     update_cache: yes
+  when: INSTALL_CRITOOLS
