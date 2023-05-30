@@ -91,6 +91,7 @@
       [crio.stats]
     dest: /etc/crio/crio.conf
     backup: true
+  notify: Restart cri-o
 
 - name: Create 00-crio-bridge.conflist
   copy:
@@ -118,14 +119,10 @@
         ]
       }
     dest: /etc/cni/net.d/00-crio-bridge.conflist
+  notify: Restart cri-o
 
 - name: Install cri-tools
   apt:
     name: cri-tools
     state: present
     update_cache: yes
-
-- name: Restart cri-o
-  systemd:
-    name: crio
-    state: restarted
