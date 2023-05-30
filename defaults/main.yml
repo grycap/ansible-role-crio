@@ -2,3 +2,4 @@
 # defaults/main.yml
 
 CRIO_VERSION: 1.25
+CRIO_ROOT_DIR: '/var/lib/containers/storage'
