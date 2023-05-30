@@ -72,13 +72,15 @@
   copy:
     content: |
       [crio]
+      # Path to the "root directory". CRI-O stores all of its data, including
+      # containers images, in this directory.
+      root = "{{ CRIO_ROOT_DIR }}"
       [crio.api]
       [crio.runtime]
       [crio.image]
       [crio.network]
       # Path to the directory where CNI configuration files are located.
       network_dir = "/etc/cni/net.d/"
-
       # Paths to directories where CNI plugin binaries are located.
       plugin_dirs = [
               "/opt/cni/bin/",
@@ -89,6 +91,7 @@
       [crio.stats]
     dest: /etc/crio/crio.conf
     backup: true
+  notify: Restart cri-o
 
 - name: Create 00-crio-bridge.conflist
   copy:
@@ -116,14 +119,11 @@
         ]
       }
     dest: /etc/cni/net.d/00-crio-bridge.conflist
+  notify: Restart cri-o
 
 - name: Install cri-tools
   apt:
     name: cri-tools
     state: present
     update_cache: yes
-
-- name: Restart cri-o
-  systemd:
-    name: crio
-    state: restarted
+  when: INSTALL_CRITOOLS
