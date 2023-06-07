@@ -68,6 +68,12 @@
     name: containernetworking-plugins
     state: present
 
+- name: Install criu
+  apt:
+    name: criu
+    state: present
+  when: ENABLE_CRIU 
+
 - name: Create crio.conf
   copy:
     content: |
