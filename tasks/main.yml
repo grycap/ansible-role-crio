@@ -83,7 +83,7 @@
       root = "{{ CRIO_ROOT_DIR }}"
       [crio.api]
       [crio.runtime]
-      enable_criu_support = {{ ENABLE_CRIU }}
+      enable_criu_support = true
       [crio.image]
       [crio.network]
       # Path to the directory where CNI configuration files are located.
