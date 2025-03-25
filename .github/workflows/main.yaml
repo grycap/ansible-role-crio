@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-python@v3
     
       - name: Install Ansible
-        run: sudo pip install ansible==2.9.26
+        run: sudo pip install ansible==8.7.0
 
       - name: Create ansible.cfg with correct roles_path
         run: sudo printf '[defaults]\nhost_key_checking = False\nroles_path=../' > ansible.cfg
